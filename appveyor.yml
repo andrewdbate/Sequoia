@@ -7,7 +7,7 @@ install:
 build_script:
   - sbt clean compile
 test_script:
-  - sbt validateWindows
+  - sbt 'project root' test
 cache:
   - C:\sbt\
   - C:\Users\appveyor\.m2
