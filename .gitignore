@@ -1,0 +1,81 @@
+*.*~
+
+# Local directories #
+#####################
+local/
+
+# .old files #
+##############
+*.old
+
+# Compiled source #
+###################
+target/
+classes/
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Logs #
+########
+*.log
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# JVM generated files #
+#######################
+*.lck
+
+# SBT #
+#######
+boot/
+lib_managed/
+target/
+.history
+dist/*
+target/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Eclipse #
+###########
+.cache
+.classpath
+.project
+.scala_dependencies
+.settings
+.target/
+
+# IntelliJ #
+############
+.idea/
+.idea_modules/
+*.iml
+*.ipr
+*.iws
+out/
+
+# JIRA plugin #
+###############
+atlassian-ide-plugin.xml
+
+# TextMate #
+############
+*.tmproj
+
+# Cygwin for Windows #
+######################
+.goutputstream*

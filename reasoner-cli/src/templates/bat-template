@@ -1,0 +1,191 @@
+:: DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+::
+:: This file is part of Sequoia, an OWL 2 reasoner that supports the SRIQ subset of OWL 2 DL.
+:: Copyright 2017 by Andrew Bate <code@andrewbate.com>.
+::
+:: This code is free software: you can redistribute it and/or modify
+:: it under the terms of the GNU General Public License version 3 only,
+:: as published by the Free Software Foundation.
+::
+:: This program is distributed in the hope that it will be useful,
+:: but WITHOUT ANY WARRANTY; without even the implied warranty of
+:: MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+:: GNU General Public License version 3 for more details (a copy is
+:: included in the LICENSE file that accompanied this code).
+::
+:: You should have received a copy of the GNU General Public License
+:: version 3 along with this work.  If not, see <http://www.gnu.org/licenses/>.
+
+:: This file is available under and governed by the GNU General Public
+:: License version 3 only, as published by the Free Software Foundation.
+:: However, the following notice accompanied the original version of this
+:: file:
+::
+:: Copyright (c) 2012, Joshua Suereth All rights reserved.
+::
+:: Redistribution and use in source and binary forms, with or without
+:: modification, are permitted provided that the following conditions are met:
+::
+:: Redistributions of source code must retain the above copyright notice,
+:: this list of conditions and the following disclaimer. Redistributions
+:: in binary form must reproduce the above copyright notice, this list of
+:: conditions and the following disclaimer in the documentation and/or
+:: other materials provided with the distribution. THIS SOFTWARE IS
+:: PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+:: EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+:: IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+:: PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+:: CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+:: EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+:: PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+:: PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+:: LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+:: NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+:: SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+:: @@APP_NAME@@ launcher script
+::
+:: Environment:
+:: JAVA_HOME - location of a JDK home dir (optional if java on path)
+:: CFG_OPTS  - JVM options (optional)
+:: Configuration:
+:: @@APP_ENV_NAME@@_config.txt found in the @@APP_ENV_NAME@@_HOME.
+
+@setlocal enabledelayedexpansion
+
+@echo off
+
+if "%@@APP_ENV_NAME@@_HOME%"=="" set "@@APP_ENV_NAME@@_HOME=%~dp0\\.."
+
+set "APP_LIB_DIR=%@@APP_ENV_NAME@@_HOME%\lib\"
+
+rem Detect if we were double clicked, although theoretically A user could
+rem manually run cmd /c
+for %%x in (!cmdcmdline!) do if %%~x==/c set DOUBLECLICKED=1
+
+rem FIRST we load the config file of extra options.
+set "CFG_FILE=%@@APP_ENV_NAME@@_HOME%\@@APP_ENV_NAME@@_config.txt"
+set CFG_OPTS=
+if exist %CFG_FILE% (
+  FOR /F "tokens=* eol=# usebackq delims=" %%i IN ("%CFG_FILE%") DO (
+    set DO_NOT_REUSE_ME=%%i
+    rem ZOMG (Part #2) WE use !! here to delay the expansion of
+    rem CFG_OPTS, otherwise it remains "" for this loop.
+    set CFG_OPTS=!CFG_OPTS! !DO_NOT_REUSE_ME!
+  )
+)
+
+rem We use the value of the JAVACMD environment variable if defined
+set _JAVACMD=%JAVACMD%
+
+if "%_JAVACMD%"=="" (
+  if not "%JAVA_HOME%"=="" (
+    if exist "%JAVA_HOME%\bin\java.exe" set "_JAVACMD=%JAVA_HOME%\bin\java.exe"
+  )
+)
+
+if "%_JAVACMD%"=="" set _JAVACMD=java
+
+rem Detect if this java is ok to use.
+for /F %%j in ('"%_JAVACMD%" -version  2^>^&1') do (
+  if %%~j==java set JAVAINSTALLED=1
+  if %%~j==openjdk set JAVAINSTALLED=1
+)
+
+rem BAT has no logical or, so we do it alternately
+set JAVAOK=true
+if not defined JAVAINSTALLED set JAVAOK=false
+
+if "%JAVAOK%"=="false" (
+  echo.
+  echo A Java JDK is not installed or can't be found.
+  if not "%JAVA_HOME%"=="" (
+    echo JAVA_HOME = "%JAVA_HOME%"
+  )
+  echo.
+  echo Please go to
+  echo   http://www.oracle.com/technetwork/java/javase/downloads/index.html
+  echo and download a valid Java JRE and install before running @@APP_NAME@@.
+  echo.
+  echo If you think this message is in error, please check your environment
+  echo variables to see if "java.exe" is available via JAVA_HOME or PATH.
+  echo.
+  if defined DOUBLECLICKED pause
+  exit /B 1
+)
+
+
+rem We use the value of the JAVA_OPTS environment variable if defined, rather than the config.
+set _JAVA_OPTS=%JAVA_OPTS%
+if "!_JAVA_OPTS!"=="" set _JAVA_OPTS=!CFG_OPTS!
+
+rem We keep in _JAVA_PARAMS all -J-prefixed and -D-prefixed arguments
+rem "-J" is stripped, "-D" is left as is, and everything is appended to JAVA_OPTS
+set _JAVA_PARAMS=
+set _APP_ARGS=
+
+:param_loop
+call set _PARAM1=%%1
+set "_TEST_PARAM=%~1"
+
+if ["!_PARAM1!"]==[""] goto param_afterloop
+
+
+rem ignore arguments that do not start with '-'
+if "%_TEST_PARAM:~0,1%"=="-" goto param_java_check
+set _APP_ARGS=!_APP_ARGS! !_PARAM1!
+shift
+goto param_loop
+
+:param_java_check
+if "!_TEST_PARAM:~0,2!"=="-J" (
+  rem strip -J prefix
+  set _JAVA_PARAMS=!_JAVA_PARAMS! !_TEST_PARAM:~2!
+  shift
+  goto param_loop
+)
+
+if "!_TEST_PARAM:~0,2!"=="-D" (
+  rem test if this was double-quoted property "-Dprop=42"
+  for /F "delims== tokens=1,*" %%G in ("!_TEST_PARAM!") DO (
+    if not ["%%H"] == [""] (
+      set _JAVA_PARAMS=!_JAVA_PARAMS! !_PARAM1!
+    ) else if [%2] neq [] (
+      rem it was a normal property: -Dprop=42 or -Drop="42"
+      call set _PARAM1=%%1=%%2
+      set _JAVA_PARAMS=!_JAVA_PARAMS! !_PARAM1!
+      shift
+    )
+  )
+) else (
+  if "!_TEST_PARAM!"=="-main" (
+    call set CUSTOM_MAIN_CLASS=%%2
+    shift
+  ) else (
+    set _APP_ARGS=!_APP_ARGS! !_PARAM1!
+  )
+)
+shift
+goto param_loop
+:param_afterloop
+
+set _JAVA_OPTS=!_JAVA_OPTS! !_JAVA_PARAMS!
+:run
+
+@@APP_DEFINES@@
+
+if defined CUSTOM_MAIN_CLASS (
+    set MAIN_CLASS=!CUSTOM_MAIN_CLASS!
+) else (
+    set MAIN_CLASS=!APP_MAIN_CLASS!
+)
+
+rem Call the application and pass all arguments unchanged.
+"%_JAVACMD%" !_JAVA_OPTS! !@@APP_ENV_NAME@@_OPTS! -cp "%APP_CLASSPATH%" %MAIN_CLASS% !_APP_ARGS!
+
+@endlocal
+
+
+:end
+
+exit /B %ERRORLEVEL%

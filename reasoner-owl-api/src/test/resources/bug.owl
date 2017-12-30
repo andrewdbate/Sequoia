@@ -1,0 +1,14 @@
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)
+Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(:=<http://www.example.org/test#>)
+
+Ontology(
+  # An old version of the reasoner found at :A was equivalent to owl:Nothing because the
+  # OWL API converter treated ObjectInverseOf(:R) as just :R.
+  ObjectPropertyRange(:R :C2)
+  DisjointClasses(:C1 :C2)
+  SubClassOf(:A ObjectSomeValuesFrom(ObjectInverseOf(:R) :C1))
+)

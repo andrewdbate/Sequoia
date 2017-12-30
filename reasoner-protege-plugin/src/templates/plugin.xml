@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+    <extension id="sequoia.reasoner.factory" point="org.protege.editor.owl.inference_reasonerfactory">
+        <name value="@@REASONER_NAME@@"/>
+        <class value="com.sequoiareasoner.protege.ProtegeReasonerFactory"/>
+    </extension>bar
+    <extension id="sequoia.reasoner.configuration" point="org.protege.editor.owl.inference_preferences">
+        <label value="@@REASONER_NAME@@"/>
+        <class value="com.sequoiareasoner.protege.ui.SequoiaPreferencesPanel"/>
+    </extension>
+</plugin>
