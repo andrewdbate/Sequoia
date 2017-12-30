@@ -1,4 +1,5 @@
 [![License: GPL v3](https://img.shields.io/badge/license-GNU%20GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build Status](https://travis-ci.org/andrewdbate/Sequoia.svg?branch=master)](https://travis-ci.org/andrewdbate/Sequoia)
 
 # Sequoia: An Open Source OWL 2 DL Reasoner for Java
 
