@@ -29,7 +29,9 @@ import org.semanticweb.owlapi.util.{HashCode, OWLObjectTypeIndexProvider}
   *
   * A custom implementation allows us to avoid the dependency on OWL API bindings.
   *
-  * @param iri  the IRI of this class
+  * @author Andrew Bate <code@andrewbate.com>
+  *
+  * @param iri  the IRI of this class.
   */
 final class OWLClassImpl(iri: IRI) extends OWLClass {
   override def accept(visitor: OWLClassExpressionVisitor): Unit = visitor.visit(this)
@@ -49,7 +51,7 @@ final class OWLClassImpl(iri: IRI) extends OWLClass {
   override def asOWLNamedIndividual: Nothing = throw new OWLRuntimeException("Not an individual!")
   override def asOWLObjectProperty: Nothing = throw new OWLRuntimeException("Not an object property!")
   override def compareTo(o: OWLObject): Int = {
-    // For compatibility with the OWL API.
+    // For compatibility with the OWL API v4.
     val thisTypeIndex: Int = OWLObjectTypeIndexProvider.OWL_CLASS
     val thatTypeIndex: Int = objectTypeIndexProvider.getTypeIndex(o)
     val diff = thisTypeIndex - thatTypeIndex
@@ -70,7 +72,7 @@ final class OWLClassImpl(iri: IRI) extends OWLClass {
   override def getIRI: IRI = iri
   override def getNestedClassExpressions: jSet[OWLClassExpression] = jCollections.singleton(this)
   override def getNNF: this.type = this
-  override def getObjectComplementOf: OWLClassExpression = ??? // FIXME
+  override def getObjectComplementOf: OWLClassExpression = new OWLObjectComplementOfImpl(this)
   override def getObjectPropertiesInSignature: jSet[OWLObjectProperty] = jCollections.emptySet()
   override def getSignature: jSet[OWLEntity] = jCollections.singleton(this)
   override def isAnonymous: Boolean = false
