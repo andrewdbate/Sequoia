@@ -15,6 +15,8 @@ If you discover a bug, please report it [here](https://github.com/andrewdbate/Se
 
 Sequoia is free and open-source software that is licensed under the [GNU GPL v3](https://github.com/andrewdbate/Sequoia/blob/master/LICENSE) only.
 
+_Note:_ To compile Sequoia you will need JDK 8 installed. Compiling with Java 9 is not supported at this time.
+
 #### Current Limitations
  * Datatypes are not supported.
  * Neither nominals nor ABox assertions are supported.
