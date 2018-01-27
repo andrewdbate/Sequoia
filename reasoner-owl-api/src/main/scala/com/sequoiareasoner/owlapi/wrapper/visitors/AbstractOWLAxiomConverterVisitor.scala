@@ -66,7 +66,7 @@ import com.sequoiareasoner.kernel.owl.model.Axiom
 abstract class AbstractOWLAxiomConverterVisitor[T <: Axiom](targetClass: Class[T]) extends OWLAxiomVisitorEx[T] {
 
   private[this] def illegalConversionFrom(t: Class[_]): Nothing =
-    throw new IllegalArgumentException(s"${t.getSimpleName} cannot be converted to ${targetClass.getSimpleName}.")
+    throw new IllegalArgumentException(s"${t.getName} cannot be converted to ${targetClass.getName}.")
 
   override def visit(axiom: OWLSubAnnotationPropertyOfAxiom): T =
     illegalConversionFrom(classOf[OWLSubAnnotationPropertyOfAxiom])
