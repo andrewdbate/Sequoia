@@ -30,16 +30,6 @@ import org.scalatest.FunSuite
 class ReasonerAPITest extends FunSuite {
   import CommonNames._
 
-  private[this] val DoNothingLogger = new Logger {
-    override def config(msg: String): Unit = {}
-    override def trace(msg: String): Unit = {}
-    override def info(msg: String): Unit = {}
-    override def warn(msg: String): Unit = {}
-    override def error(msg: String): Unit = {}
-  }
-
-  private[this] val DoNothingUnsupportedFeatureObserver = new UnsupportedFeatureObserverIgnore
-
   private[this] val Configuration = ReasonerConfiguration.getDefaultConfiguration
 
   test("Fresh entities exception") {

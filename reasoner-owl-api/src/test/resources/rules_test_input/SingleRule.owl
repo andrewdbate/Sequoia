@@ -1,0 +1,18 @@
+Prefix(:=<http://example.org/>)
+Ontology(
+Declaration(ObjectProperty(:R))
+Declaration(ObjectProperty(:S))
+Declaration(ObjectProperty(:T))
+Declaration(Class(:U))
+# R(x1, y1) AND S(x2, y2) AND T(x3, y3) AND x1 == x2 AND x1 == x3 -> U(x3).
+DLSafeRule(
+  Body(
+     ObjectPropertyAtom(:R Variable(:x1) Variable(:y1))
+     ObjectPropertyAtom(:S Variable(:x2) Variable(:y2))
+     ObjectPropertyAtom(:T Variable(:x3) Variable(:y3))
+     SameIndividualAtom(Variable(:x1) Variable(:x2))
+     SameIndividualAtom(Variable(:x1) Variable(:x3))
+  )
+  Head(ClassAtom(:U Variable(:x3)))
+)
+)

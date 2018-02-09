@@ -21,9 +21,8 @@
 package com.sequoiareasoner.protege
 
 import com.sequoiareasoner.owlapi.SequoiaReasonerConfiguration
-import org.protege.editor.core.prefs.Preferences
-import org.protege.editor.core.prefs.PreferencesManager
-import org.semanticweb.owlapi.reasoner.{FreshEntityPolicy, IndividualNodeSetPolicy, OWLReasonerConfiguration}
+import org.protege.editor.core.prefs.{Preferences, PreferencesManager}
+import org.semanticweb.owlapi.reasoner.{FreshEntityPolicy, IndividualNodeSetPolicy}
 
 /** Loads and stores the Sequoia OWL Reasoner configuration to the Protégé registry.
   *
@@ -31,6 +30,8 @@ import org.semanticweb.owlapi.reasoner.{FreshEntityPolicy, IndividualNodeSetPoli
   * configuration is used.
   *
   * Can obtain an OWL reasoner configuration with the settings stored here.
+  *
+  * @author Andrew Bate <code@andrewbate.com>
   */
 object SequoiaReasonerPreferences {
   private[this] val idSequoiaPreferences                  = "com.sequoiareasoner"
@@ -43,14 +44,16 @@ object SequoiaReasonerPreferences {
 
   /** The default preferences are set to be identical to the default reasoner configuration. */
   private[this] val defaults = SequoiaReasonerConfiguration.getDefaultOWLReasonerConfiguration()
-  val defaultAllowFreshEntities: Boolean = defaults.freshEntityPolicy == FreshEntityPolicy.ALLOW
+  val defaultAllowFreshEntities: Boolean = defaults.getFreshEntityPolicy == FreshEntityPolicy.ALLOW
   /** The default timeout to use for reasoning tasks. Set to 10 hours.
     * Note that this timeout for Protégé is different to that supplied by the default reasoner configuration.
     */
   val defaultTimeout: Long = 600000
-  val defaultIndividualNodeSetSameAs: Boolean = defaults.individualNodeSetPolicy == IndividualNodeSetPolicy.BY_SAME_AS
-  val defaultEnableMultithreading: Boolean = defaults.enableMultithreading
-  val defaultEnableEqualityReasoning: Boolean = defaults.enableEqualityReasoning
+  val defaultIndividualNodeSetSameAs: Boolean       = defaults.getIndividualNodeSetPolicy == IndividualNodeSetPolicy.BY_SAME_AS
+  val defaultEnableMultithreading: Boolean          = defaults.isMultithreadingEnabled
+  val defaultEnableEqualityReasoning: Boolean       = defaults.isEqualityReasoningEnabled
+  val defaultEnableEqualitySimplifyReflect: Boolean = defaults.isEqualitySimplifyReflectEnabled
+  val defaultEnableTrieRedundancyIndex: Boolean     = defaults.isTrieRedundancyIndexEnabled
 
   private[this] def getPreferences: Preferences = {
     val prefMan: PreferencesManager = PreferencesManager.getInstance
@@ -74,27 +77,6 @@ object SequoiaReasonerPreferences {
 
   /** `true` if information dialog about unsupported OWL API method call should be shown. */
   protected[protege] var showUnsupportedOWLAPIMethodWarning: Boolean = true
-
-  /** Returns an OWL reasoner configuration with the preferences set here. The preferences which are not specified here
-    * (i.e., those that cannot be configured from within Protégé, including the progress monitor and unsupported method
-    * handler) are set to their defaults as provided by
-    * {{{SequoiaReasonerConfiguration.getDefaultOWLReasonerConfiguration()}}}.
-    *
-    * @return the reasoner configuration.
-    */
-  def reasonerConfiguration: SequoiaReasonerConfiguration =
-    SequoiaReasonerConfiguration(
-      defaults.progressMonitor,
-      if (allowFreshEntities) FreshEntityPolicy.ALLOW else FreshEntityPolicy.DISALLOW,
-      timeout,
-      if (defaultIndividualNodeSetSameAs) IndividualNodeSetPolicy.BY_SAME_AS else IndividualNodeSetPolicy.BY_NAME,
-      defaults.unsupportedFeatureObserver,
-      defaults.unsupportedAPIMethodHandler,
-      enableMultithreading,
-      defaults.enableEqualitySimplifyReflect,
-      defaults.enableTrieRedundancyIndex,
-      enableEqualityReasoning,
-    )
 
   /**
     * Load preferences for Sequoia from the Protégé registry.

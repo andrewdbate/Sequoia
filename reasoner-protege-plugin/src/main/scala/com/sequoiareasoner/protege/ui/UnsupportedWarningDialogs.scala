@@ -24,11 +24,12 @@ import java.awt.Dimension
 import javax.swing.{Box, BoxLayout, JCheckBox, JLabel, JOptionPane, JPanel}
 
 import com.sequoiareasoner.buildinfo.BuildInfo
-import com.sequoiareasoner.owlapi.DefaultUnsupportedAPIMethodHandler
+import com.sequoiareasoner.owlapi.{DefaultUnsupportedAPIMethodHandler, UnsupportedSWRLRuleHandler}
 import com.sequoiareasoner.kernel.owl.model.{Axiom, ClassExpression}
 import com.sequoiareasoner.kernel.owl.printers.OWLFunctionalStylePrinter
 import com.sequoiareasoner.kernel.structural.UnsupportedFeatureObserver
 import com.sequoiareasoner.protege.SequoiaReasonerPreferences
+import org.semanticweb.owlapi.model.SWRLRule
 
 /** Creates a window to log messages about logical features unsupported by Sequoia, or OWL API methods
   * that are unimplemented in the current version of Sequoia.
@@ -38,7 +39,7 @@ import com.sequoiareasoner.protege.SequoiaReasonerPreferences
   *
   * @author Andrew Bate <code@andrewbate.com>
   */
-class UnsupportedWarningDialogs extends DefaultUnsupportedAPIMethodHandler with UnsupportedFeatureObserver {
+class UnsupportedWarningDialogs extends DefaultUnsupportedAPIMethodHandler with UnsupportedSWRLRuleHandler with UnsupportedFeatureObserver {
 
   private[this] val eventTraceFrame = new EventTraceFrame
 
@@ -56,6 +57,9 @@ class UnsupportedWarningDialogs extends DefaultUnsupportedAPIMethodHandler with 
 
   override def reportUnsupported(ce: ClassExpression): Unit =
     appendMessage(s"Class Expression Unsupported: ${OWLFunctionalStylePrinter.fssString(ce)}")
+
+  override def handleSWRLRule(rule: SWRLRule): Unit =
+    appendMessage(s"SWRL Rule Unsupported: $rule")
 
   override def reportUnsupported(method: String): Unit = {
     showOWLAPIMessage

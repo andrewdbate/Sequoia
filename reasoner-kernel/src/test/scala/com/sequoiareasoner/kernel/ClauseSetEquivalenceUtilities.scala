@@ -309,7 +309,7 @@ object ClauseSetEquivalenceUtilities {
     new DecoratedSet(s map toSTClause toSeq)
 
   def transform(axioms: Set[_ <: Axiom]): Set[OntologyClause] = {
-    val ontology = new DLOntology(axioms, new UnsupportedFeatureObserverThrowException)
+    val ontology = new DLOntology(axioms, CommonNames.DoNothingUnsupportedFeatureObserver)
     ontology.getOntologyClauses.toSet
   }
 

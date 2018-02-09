@@ -20,9 +20,12 @@
 
 package com.sequoiareasoner.protege
 
+import com.sequoiareasoner.kernel.logging.Logger
+import com.sequoiareasoner.kernel.reasoner.ReasonerConfiguration
+import com.sequoiareasoner.kernel.structural.UnsupportedFeatureObserver
 import org.protege.editor.owl.model.inference.AbstractProtegeOWLReasonerInfo
-import com.sequoiareasoner.owlapi.{SequoiaReasonerFactory, SequoiaReasonerProgressMonitor}
-import org.semanticweb.owlapi.reasoner.{BufferingMode, OWLReasonerConfiguration, OWLReasonerFactory, ReasonerProgressMonitor}
+import com.sequoiareasoner.owlapi._
+import org.semanticweb.owlapi.reasoner._
 import com.sequoiareasoner.protege.ui.UnsupportedWarningDialogs
 
 /** Entry point for the Sequoia reasoner plugin for Protégé.
@@ -42,11 +45,23 @@ class ProtegeReasonerFactory extends AbstractProtegeOWLReasonerInfo {
 
   override def getConfiguration(monitor: ReasonerProgressMonitor): OWLReasonerConfiguration = {
     val unsupportedWarningDialogs = new UnsupportedWarningDialogs
-    SequoiaReasonerPreferences.reasonerConfiguration.copy(
+    import SequoiaReasonerPreferences._
+    new SequoiaReasonerConfiguration(
       progressMonitor = new SequoiaReasonerProgressMonitor(monitor),
-      unsupportedFeatureObserver = unsupportedWarningDialogs,
-      unsupportedAPIMethodHandler = unsupportedWarningDialogs
-    )
+      freshEntityPolicy = if (allowFreshEntities) FreshEntityPolicy.ALLOW else FreshEntityPolicy.DISALLOW,
+      timeOut = timeout,
+      individualNodeSetPolicy = if (defaultIndividualNodeSetSameAs) IndividualNodeSetPolicy.BY_SAME_AS else IndividualNodeSetPolicy.BY_NAME,
+      unsupportedFeatureTreatment = UnsupportedFeatureTreatment.IGNORE,
+      unsupportedAPIMethodHandler = unsupportedWarningDialogs,
+      enableMultithreading = enableMultithreading,
+      enableEqualitySimplifyReflect = defaultEnableEqualitySimplifyReflect,
+      enableTrieRedundancyIndex = defaultEnableTrieRedundancyIndex,
+      enableEqualityReasoning = enableEqualityReasoning,
+    ) {
+      override def getUnsupportedFeatureObserver(logger: Logger): UnsupportedFeatureObserver = unsupportedWarningDialogs
+      override def getUnsupportedSWRLRuleHandler(logger: Logger): UnsupportedSWRLRuleHandler = unsupportedWarningDialogs
+    }
+
   }
 
 }

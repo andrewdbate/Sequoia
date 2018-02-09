@@ -57,7 +57,7 @@ import java.util.ArrayList
 
 import com.sequoiareasoner.kernel.Reasoner
 import com.sequoiareasoner.kernel.taxonomy.Taxonomy
-import com.sequoiareasoner.owlapi.{SequoiaReasoner, SequoiaReasonerConfiguration}
+import com.sequoiareasoner.owlapi.{SequoiaReasoner, SequoiaReasonerConfiguration, UnsupportedFeatureTreatment}
 import org.semanticweb.owlapi.apibinding.OWLManager
 import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat
 import org.semanticweb.owlapi.model.{IRI, OWLAxiom, OWLOntology, OWLOntologyManager}
@@ -99,6 +99,13 @@ final class CLICommandClassify extends CLICommand {
       isMandatory = false)
     disableEqualityReasoningOption.setArg(NoArgument)
     options += disableEqualityReasoningOption
+    val ignoreUnsupportedFeaturesOption = CommandOption(
+      longOption = "ignoreUnsupportedFeatures",
+      shortOption = "iuf",
+      description = "Ignores unsupported features in the input ontology (may lead to incompleteness).",
+      isMandatory = false)
+    ignoreUnsupportedFeaturesOption.setArg(NoArgument)
+    options += ignoreUnsupportedFeaturesOption
     options += ignoreImportsOption
     options
   }
@@ -111,8 +118,14 @@ final class CLICommandClassify extends CLICommand {
     val shouldEnableMultithreading: Boolean = !disableMultithreadingOption.getValueAsBoolean
     val disableEqualityReasoningOption: CommandOption = options.getOption("disableEqualityReasoning")
     val shouldEnableEqualityReasoning: Boolean = !disableEqualityReasoningOption.getValueAsBoolean
+    val ignoreUnsupportedFeaturesOption: CommandOption = options.getOption("ignoreUnsupportedFeatures")
+    val unsupportedFeatureTreatment: UnsupportedFeatureTreatment =
+      if (ignoreUnsupportedFeaturesOption.getValueAsBoolean) UnsupportedFeatureTreatment.IGNORE
+      else UnsupportedFeatureTreatment.THROW_EXCEPTION
 
-    val reasoner: SequoiaReasoner = getSequoiaReasoner(new SequoiaReasonerConfiguration(enableMultithreading = shouldEnableMultithreading, enableEqualityReasoning = shouldEnableEqualityReasoning))
+    val reasoner: SequoiaReasoner = getSequoiaReasoner(new SequoiaReasonerConfiguration(enableMultithreading = shouldEnableMultithreading,
+                                                                                        enableEqualityReasoning = shouldEnableEqualityReasoning,
+                                                                                        unsupportedFeatureTreatment = unsupportedFeatureTreatment))
     val internalReasoner: Reasoner = reasoner.getInternalReasoner
 
     startTask("consistency check")

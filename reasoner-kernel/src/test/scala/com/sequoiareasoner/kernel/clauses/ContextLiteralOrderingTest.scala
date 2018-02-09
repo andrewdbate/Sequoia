@@ -63,7 +63,7 @@ class ContextLiteralOrderingTest extends FunSuite {
   // TODO: implement property based testing.
 
   // Dummy implicit ontology to allow for construction of Concepts and Roles.
-  private[this] implicit val ontology = new DLOntology(Set.empty, new UnsupportedFeatureObserverThrowException)
+  private[this] implicit val ontology = new DLOntology(Set.empty, DoNothingUnsupportedFeatureObserver)
 
   private[this] val Af1x = Concept(A, f1)
   private[this] val Af2x = Concept(A, f2)

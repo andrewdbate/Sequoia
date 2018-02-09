@@ -20,6 +20,7 @@
 
 package com.sequoiareasoner.kernel.structural
 
+import com.sequoiareasoner.kernel.logging.Logger
 import com.sequoiareasoner.kernel.owl.model.{Axiom, ClassExpression}
 import com.sequoiareasoner.kernel.reasoner.SequoiaRuntimeException
 
@@ -40,14 +41,22 @@ trait UnsupportedFeatureObserver extends Serializable {
   def reportUnsupported(ce: ClassExpression): Unit
 }
 
-final class UnsupportedFeatureObserverThrowException extends UnsupportedFeatureObserver {
-  override def reportUnsupported(ax: Axiom): Nothing =
+class UnsupportedFeatureObserverThrowException(logger: Logger) extends UnsupportedFeatureObserver {
+  override def reportUnsupported(ax: Axiom): Nothing = {
+    logger.error(s"Axiom $ax is unsupported.")
     throw new UnsupportedAxiomException(ax)
-  override def reportUnsupported(ce: ClassExpression): Nothing =
+  }
+  override def reportUnsupported(ce: ClassExpression): Nothing = {
+    logger.error(s"Class expression $ce is unsupported.")
     throw new UnsupportedClassExpressionException(ce)
+  }
 }
 
-final class UnsupportedFeatureObserverIgnore extends UnsupportedFeatureObserver {
-  override def reportUnsupported(ax: Axiom): Unit = {}
-  override def reportUnsupported(ce: ClassExpression): Unit = {}
+class UnsupportedFeatureObserverIgnore(logger: Logger) extends UnsupportedFeatureObserver {
+  override def reportUnsupported(ax: Axiom): Unit = {
+    logger.warn(s"Axiom $ax is unsupported.")
+  }
+  override def reportUnsupported(ce: ClassExpression): Unit = {
+    logger.warn(s"Class expression $ce is unsupported.")
+  }
 }

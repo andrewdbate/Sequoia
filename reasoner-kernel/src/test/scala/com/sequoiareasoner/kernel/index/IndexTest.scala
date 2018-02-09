@@ -52,16 +52,17 @@
 
 package com.sequoiareasoner.kernel.index
 
+import com.sequoiareasoner.kernel.CommonNames
 import com.sequoiareasoner.kernel.clauses._
 import com.sequoiareasoner.kernel.owl.iri.IRI
-import com.sequoiareasoner.kernel.structural.{DLOntology, UnsupportedFeatureObserverThrowException}
+import com.sequoiareasoner.kernel.structural.DLOntology
 import org.scalatest.FunSuite
 
 class IndexTest extends FunSuite {
   import Term.x
 
   // Implicit ontology to allow for construction of Concepts and Roles
-  private[this] implicit val ontology = new DLOntology(Set.empty, new UnsupportedFeatureObserverThrowException)
+  private[this] implicit val ontology = new DLOntology(Set.empty, CommonNames.DoNothingUnsupportedFeatureObserver)
 
   private[this] val A = Concept(IRI("http://www.example.com/A"), x)
   private[this] val B = Concept(IRI("http://www.example.com/B"), x)

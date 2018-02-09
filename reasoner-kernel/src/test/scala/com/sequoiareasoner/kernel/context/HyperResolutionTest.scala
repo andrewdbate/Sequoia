@@ -65,7 +65,7 @@ class HyperResolutionTest extends FunSuite {
   // Passes the current suite implicitly to the decorated sets.
   private[this] implicit val self = this
 
-  private[this] implicit val ontology = new DLOntology(Set.empty, new UnsupportedFeatureObserverThrowException)
+  private[this] implicit val ontology = new DLOntology(Set.empty, DoNothingUnsupportedFeatureObserver)
 
   val Ax = Concept(A, x)
   val Bx = Concept(B, x)

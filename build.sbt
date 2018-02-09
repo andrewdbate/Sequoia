@@ -95,6 +95,7 @@ lazy val commonSettings = repeatCommandSettings ++ Seq(
   organization := "com.sequoiareasoner",
   scalaVersion := "2.12.4",
   scalacOptions ++= Seq("-opt:l:inline", "-opt-inline-from:**", "-deprecation", "-feature", "-Ydelambdafy:method", "-target:jvm-1.8", "-encoding", "UTF-8"),
+  javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:all"),
   //libraryDependencies += "com.typesafe" % "config" % "1.0.0",
   libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test",
   // Useful test options:

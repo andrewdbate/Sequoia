@@ -1,0 +1,6 @@
+Ontology(
+Declaration(ObjectProperty(<http://example.org/R>))
+Declaration(ObjectProperty(<http://example.org/S>))
+Declaration(ObjectProperty(<http://example.org/T>))
+Declaration(Class(<http://example.org/U>))
+)

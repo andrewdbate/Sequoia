@@ -20,8 +20,9 @@
 
 package com.sequoiareasoner.owlapi
 
+import com.sequoiareasoner.kernel.logging.Logger
 import com.sequoiareasoner.kernel.reasoner.ReasonerConfiguration
-import com.sequoiareasoner.kernel.structural.{UnsupportedFeatureObserver, UnsupportedFeatureObserverThrowException}
+import com.sequoiareasoner.kernel.structural.{UnsupportedFeatureObserver, UnsupportedFeatureObserverIgnore, UnsupportedFeatureObserverThrowException}
 import org.semanticweb.owlapi.reasoner._
 
 object SequoiaReasonerConfiguration {
@@ -52,16 +53,16 @@ object SequoiaReasonerConfiguration {
   * @param enableTrieRedundancyIndex      `true` if the trie index for redundancy elimination should be used, `false` otherwise for naive redundancy indexing.
   * @param enableEqualityReasoning        `true` if equality reasoning should be enabled (required for completeness guarantees), `false` otherwise.
   */
-case class SequoiaReasonerConfiguration(progressMonitor: SequoiaReasonerProgressMonitor = new SequoiaReasonerProgressMonitor,
-                                        freshEntityPolicy: FreshEntityPolicy = FreshEntityPolicy.ALLOW,
-                                        timeOut: Long = Long.MaxValue,
-                                        individualNodeSetPolicy: IndividualNodeSetPolicy = IndividualNodeSetPolicy.BY_NAME,
-                                        unsupportedFeatureObserver: UnsupportedFeatureObserver = new UnsupportedFeatureObserverThrowException,
-                                        unsupportedAPIMethodHandler: UnsupportedAPIMethodHandler = new DefaultUnsupportedAPIMethodHandler,
-                                        enableMultithreading: Boolean = true,
-                                        enableEqualitySimplifyReflect: Boolean = true,
-                                        enableTrieRedundancyIndex: Boolean = true,
-                                        enableEqualityReasoning: Boolean = true) extends OWLReasonerConfiguration with Serializable {
+class SequoiaReasonerConfiguration(progressMonitor: SequoiaReasonerProgressMonitor = new SequoiaReasonerProgressMonitor,
+                                   freshEntityPolicy: FreshEntityPolicy = FreshEntityPolicy.ALLOW,
+                                   timeOut: Long = Long.MaxValue,
+                                   individualNodeSetPolicy: IndividualNodeSetPolicy = IndividualNodeSetPolicy.BY_NAME,
+                                   unsupportedFeatureTreatment: UnsupportedFeatureTreatment = UnsupportedFeatureTreatment.THROW_EXCEPTION,
+                                   unsupportedAPIMethodHandler: UnsupportedAPIMethodHandler = new DefaultUnsupportedAPIMethodHandler,
+                                   enableMultithreading: Boolean = true,
+                                   enableEqualitySimplifyReflect: Boolean = true,
+                                   enableTrieRedundancyIndex: Boolean = true,
+                                   enableEqualityReasoning: Boolean = true) extends OWLReasonerConfiguration with Serializable {
   import SequoiaReasonerConfiguration._
 
   override def getProgressMonitor: ReasonerProgressMonitor = progressMonitor.getReasonerProgressMonitor
@@ -74,7 +75,7 @@ case class SequoiaReasonerConfiguration(progressMonitor: SequoiaReasonerProgress
 
   override def getIndividualNodeSetPolicy: IndividualNodeSetPolicy = individualNodeSetPolicy
 
-  def getUnsupportedFeatureObserver: UnsupportedFeatureObserver = unsupportedFeatureObserver
+  def getUnsupportedFeatureTreatment: UnsupportedFeatureTreatment = unsupportedFeatureTreatment
 
   def getUnsupportedAPIMethodHandler: UnsupportedAPIMethodHandler = unsupportedAPIMethodHandler
 
@@ -88,7 +89,7 @@ case class SequoiaReasonerConfiguration(progressMonitor: SequoiaReasonerProgress
     *
     * @return `true` if the simplify-reflect optimisation for equality is enabled.
     */
-  def isPositiveSimplifyReflectEnabled: Boolean = enableEqualitySimplifyReflect
+  def isEqualitySimplifyReflectEnabled: Boolean = enableEqualitySimplifyReflect
 
   /** Returns `true` if the trie-based redundancy index should be used. If `false`, then the fallback redundancy index
     * will be maintained and used instead.
@@ -110,13 +111,27 @@ case class SequoiaReasonerConfiguration(progressMonitor: SequoiaReasonerProgress
   protected[owlapi] def getConfiguration =
     ReasonerConfiguration(progressMonitor, enableMultithreading, enableEqualitySimplifyReflect, enableTrieRedundancyIndex, enableEqualityReasoning, freshEntityPolicy == FreshEntityPolicy.ALLOW)
 
+  protected[owlapi] def getUnsupportedFeatureObserver(logger: Logger): UnsupportedFeatureObserver = unsupportedFeatureTreatment match {
+    case UnsupportedFeatureTreatment.THROW_EXCEPTION =>
+      new UnsupportedFeatureObserverThrowException(logger)
+    case UnsupportedFeatureTreatment.IGNORE =>
+      new UnsupportedFeatureObserverIgnore(logger)
+  }
+
+  protected[owlapi] def getUnsupportedSWRLRuleHandler(logger: Logger): UnsupportedSWRLRuleHandler = unsupportedFeatureTreatment match {
+    case UnsupportedFeatureTreatment.THROW_EXCEPTION =>
+      new UnsupportedSWRLRuleHandlerThrowException(logger)
+    case UnsupportedFeatureTreatment.IGNORE =>
+      new UnsupportedSWRLRuleHandlerIgnore(logger)
+  }
+
   override def toString: String =
     s"""|SequoiaReasonerConfiguration[
         |  progressMonitor: $progressMonitor;
         |  freshEntityPolicy: $freshEntityPolicy;
         |  timeOut: $timeOut;
         |  individualNodeSetPolicy: $individualNodeSetPolicy;
-        |  unsupportedFeatureObserver: ${unsupportedFeatureObserver.getClass.getSimpleName};
+        |  unsupportedFeatureTreatment: $unsupportedFeatureTreatment;
         |  unsupportedAPIMethodHandler: ${unsupportedAPIMethodHandler.getClass.getSimpleName};
         |  Multithreading: ${mkString(enableMultithreading)};
         |  EqualitySimplifyReflect: ${mkString(enableEqualitySimplifyReflect)};

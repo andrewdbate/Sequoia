@@ -53,8 +53,10 @@
 package com.sequoiareasoner.kernel
 
 import com.sequoiareasoner.kernel.clauses._
+import com.sequoiareasoner.kernel.logging.Logger
 import com.sequoiareasoner.kernel.owl.iri.{IRI, Prefix}
 import com.sequoiareasoner.kernel.owl.model.{OWLClass, ObjectProperty}
+import com.sequoiareasoner.kernel.structural.UnsupportedFeatureObserverIgnore
 
 import scala.language.implicitConversions
 
@@ -254,4 +256,14 @@ object CommonNames {
   def Head(hs: Literal*): Array[Literal] = hs.toArray
   def OntologyClause(body: Array[Predicate], head: Array[Literal]) =
     com.sequoiareasoner.kernel.clauses.OntologyClause(body.toSeq, head.toSeq)
+
+  val DoNothingLogger = new Logger {
+    override def config(msg: String): Unit = {}
+    override def trace(msg: String): Unit = {}
+    override def info(msg: String): Unit = {}
+    override def warn(msg: String): Unit = {}
+    override def error(msg: String): Unit = {}
+  }
+
+  val DoNothingUnsupportedFeatureObserver = new UnsupportedFeatureObserverIgnore(DoNothingLogger)
 }

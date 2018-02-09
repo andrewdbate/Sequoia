@@ -135,7 +135,7 @@ object ClassificationTestUtils {
       enableEqualityReasoning = true,
       allowFreshEntities = false
     )
-    val reasoner = new Reasoner(config, nopLogger, new UnsupportedFeatureObserverThrowException)
+    val reasoner = new Reasoner(config, nopLogger, DoNothingUnsupportedFeatureObserver)
     for (ax <- input) reasoner.addAxiom(ax)
     reasoner.performStructuralTransformation
     val result = if (!reasoner.isInconsistent) {

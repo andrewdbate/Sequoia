@@ -92,8 +92,8 @@ object SequoiaReasoner {
 class SequoiaReasoner private[owlapi](ontology: OWLOntology, isBufferingMode: Boolean, config: SequoiaReasonerConfiguration) extends OWLReasoner {
   import SequoiaReasoner.SequoiaLogger
 
-  private[this] def handleMethod = config.unsupportedAPIMethodHandler.handleMethod _
-  private[this] def handleMethodWithDetail = config.unsupportedAPIMethodHandler.handleMethodWithDetail _
+  private[this] def handleMethod = config.getUnsupportedAPIMethodHandler.handleMethod _
+  private[this] def handleMethodWithDetail = config.getUnsupportedAPIMethodHandler.handleMethodWithDetail _
 
   /** Listener to implement addition and removal of axioms. */
   protected[this] object OntologyChangeListener extends OWLOntologyChangeListener {
@@ -121,7 +121,7 @@ class SequoiaReasoner private[owlapi](ontology: OWLOntology, isBufferingMode: Bo
   private[this] var ontologyReloadRequired: Boolean = false
 
   /** The internal reasoner instance used for reasoning. */
-  private[this] val reasoner = new Reasoner(config.getConfiguration, SequoiaLogger, config.getUnsupportedFeatureObserver)
+  private[this] val reasoner = new Reasoner(config.getConfiguration, SequoiaLogger, config.getUnsupportedFeatureObserver(SequoiaLogger))
 
   /**
     * Loads the given [[org.semanticweb.owlapi.model.OWLOntology]] into the reasoner.
@@ -138,16 +138,20 @@ class SequoiaReasoner private[owlapi](ontology: OWLOntology, isBufferingMode: Bo
     def getStatus(importsClosureProcessed: Int): String =
       if (importsClosureCount == 1) ReasonerProgressMonitor.LOADING
       else ReasonerProgressMonitor.LOADING + " " + (importsClosureProcessed + 1) + " of " + importsClosureCount
+    val unsupportedSWRLRuleHandler = config.getUnsupportedSWRLRuleHandler(SequoiaLogger)
     importsClosure forEach { onto: OWLOntology =>
       progressMonitor.start(getStatus(importsClosureProcessed))
       val axioms: java.util.Set[OWLAxiom] = onto.getAxioms() // The axioms of the current imported ontology.
       val axiomsCount = axioms.size // The total number of axioms.
       var axiomsProcessed = 0 // Current number of processed axioms.
-      axioms forEach { axiom: OWLAxiom =>
-        //logger.trace("loading " + axiom)
-        if (OWLConverter.isRelevantAxiom(axiom)) reasoner.addAxiom(OWLConverter.convert(axiom))
-        axiomsProcessed += 1
-        progressMonitor.report(axiomsProcessed, axiomsCount)
+      axioms forEach {
+        case rule: SWRLRule =>
+          unsupportedSWRLRuleHandler.handleSWRLRule(rule)
+        case axiom: OWLAxiom =>
+          //logger.trace("loading " + axiom)
+          if (OWLConverter.isRelevantAxiom(axiom)) reasoner.addAxiom(OWLConverter.convert(axiom))
+          axiomsProcessed += 1
+          progressMonitor.report(axiomsProcessed, axiomsCount)
       }
       importsClosureProcessed += 1
       progressMonitor.finish
@@ -213,7 +217,7 @@ class SequoiaReasoner private[owlapi](ontology: OWLOntology, isBufferingMode: Bo
     handleMethod("getEquivalentObjectProperties(OWLObjectPropertyExpression):Node[OWLObjectPropertyExpression]")
 
   override def getFreshEntityPolicy: FreshEntityPolicy =
-    config.freshEntityPolicy
+    config.getFreshEntityPolicy
 
   override def getIndividualNodeSetPolicy: IndividualNodeSetPolicy =
     IndividualNodeSetPolicy.BY_NAME

@@ -51,9 +51,9 @@ class DefaultUnsupportedAPIMethodHandler extends UnsupportedAPIMethodHandler wit
     * @param method  the method which is not supported
     * @throws `UnsupportedOperationException` saying that this method is not supported
     */
-  final def handleMethod(method: String): Nothing = {
+  final override def handleMethod(method: String): Nothing = {
     reportUnsupported(method)
-    throw new UnsupportedOperationException(s"Unsupported method: OWL API reasoner method is not implemented: $method.") // TODO: add custom exception; extend ???.
+    throw new SequoiaUnsupportedException(s"Unsupported method: OWL API reasoner method is not implemented: $method.")
   }
 
   /** Throw an exception when an unsupported OWL API method is invoked.
@@ -62,9 +62,9 @@ class DefaultUnsupportedAPIMethodHandler extends UnsupportedAPIMethodHandler wit
     * @param detail  the reason why the case is not supported
     * @throws `UnsupportedOperationException` saying that this method is not supported
     */
-  final def handleMethodWithDetail(method: String, detail: String): Nothing = {
+  final override def handleMethodWithDetail(method: String, detail: String): Nothing = {
     reportUnsupported(method: String, detail: String)
-    throw new UnsupportedOperationException(s"Unsupported method: OWL API reasoner method is not implemented: $method: $detail.")
+    throw new SequoiaUnsupportedException(s"Unsupported method: OWL API reasoner method is not implemented: $method: $detail.")
   }
 
 }
