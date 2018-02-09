@@ -20,6 +20,7 @@ _Note:_ To compile Sequoia you will need JDK 8 installed. Compiling with Java 9 
 #### Current Limitations
  * Datatypes are not supported.
  * Neither nominals nor ABox assertions are supported.
+ * SWRL rules are not supported.
 
 ## Publications
 The following publications describe the algorithms and implementation of Sequoia.
