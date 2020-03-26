@@ -93,7 +93,7 @@ lazy val commonSettings = repeatCommandSettings ++ Seq(
   // version *must* be of the form MAJOR.MINOR.PATCH.BUILD where each component is an integer, otherwise String to Int parsing will fail.
   version      := "0.6.1-alpha",
   organization := "com.sequoiareasoner",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.11",
   scalacOptions ++= Seq("-opt:l:inline", "-opt-inline-from:**", "-deprecation", "-feature", "-Ydelambdafy:method", "-target:jvm-1.8", "-encoding", "UTF-8"),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:all"),
   //libraryDependencies += "com.typesafe" % "config" % "1.0.0",
